@@ -418,6 +418,40 @@
         .profile-card {
             text-align: center; /* centers inline elements inside */
         }
+
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-section label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .filter-section select, 
+        .filter-section button {
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid #c4cad4;
+            font-size: 12px;
+            cursor: pointer;
+        }       
+
+        .filter-section button {
+            background: #FEF9E7;
+            border: 1px solid #c4cad4;
+            font-weight: 600;
+        }
+
+        .filter-section button:hover {
+            background: #f7f1d9;
+        }
+        
     </style>
 </head>
 <body>
@@ -445,6 +479,26 @@
                     </div>
 
                     <div class="section-title">🌟 Recommended For You</div>
+                    <div class="filter-section">
+                        <label for="faculty-filter">Faculty:</label>
+                            <select id="faculty-filter">
+                                <option value="all">All</option>
+                                <option value="Commerce">Commerce</option>
+                                <option value="Science">Science</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Arts">Arts</option>
+                            </select>
+
+                        <label for="year-filter">Year:</label>
+                            <select id="year-filter">
+                                <option value="all">All</option>
+                                <option value="2">Year 2</option>
+                                <option value="3">Year 3</option>
+                                <option value="4">Year 4</option>
+                            </select>
+
+                    <button id="apply-filter">Apply Filter</button>
+                </div>
                     <div class="profile-grid">
                         <div class="profile-card" onclick="showPage('profile')">
                             <div class="avatar">👨‍💼</div>
@@ -607,5 +661,26 @@
             document.getElementById(pageId).classList.add('active');
         }
     </script>
+    <script>
+    const profiles = document.querySelectorAll('.profile-card');
+
+    document.getElementById('apply-filter').addEventListener('click', () => {
+        const facultyValue = document.getElementById('faculty-filter').value;
+        const yearValue = document.getElementById('year-filter').value;
+
+        profiles.forEach(profile => {
+            const profileDetails = profile.querySelector('.details').textContent;
+            let facultyMatch = facultyValue === 'all' || profileDetails.includes(facultyValue);
+            let yearMatch = yearValue === 'all' || profileDetails.includes(`Year ${yearValue}`);
+
+            if(facultyMatch && yearMatch) {
+                profile.style.display = 'block';
+            } else {
+                profile.style.display = 'none';
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
