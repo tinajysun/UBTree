@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBTree - Cross-Faculty Networking</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1A2A6C, #2E8BC0, #16213E);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .phone-container {
+            width: 375px;
+            height: 667px;
+            background: #000;
+            border-radius: 40px;
+            padding: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #f5f5f5;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* Header Styles */
+        .header {
+            background: #54c4e6;
+            padding: 50px 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header.chat-header {
+            background: #B8E0D2;
+        }
+
+        .header.profile-header {
+            background: #B8E0D2;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #c4cad4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .username-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .username {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .search-icon, .settings-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+
+        /* Homepage Content */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #FEF9E7;
+        }
+
+        .content.profile-content {
+            background: #FEF9E7;
+            padding: 0;
+        }
+
+        .content.chat-content {
+            background: #FEF9E7;
+            padding: 15px;
+        }
+
+        .qotd-banner {
+            background: #B8E0D2;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #7cafa4;
+        }
+
+        .qotd-label {
+            color: #5B8FDB;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .qotd-text {
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .profile-card .avatar {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            font-size: 28px;
+        }
+
+        .profile-card .name {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .profile-card .details {
+            text-align: center;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .streak-badge {
+            display: inline-block;
+            background: #204196;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        /* Chat Styles */
+        .chat-message {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: flex-end;
+        }
+
+        .chat-message.sent {
+            flex-direction: row-reverse;
+        }
+
+        .chat-message .avatar {
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            margin: 0 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .chat-message.received .message-bubble {
+            background: #c4cad4;
+            color: white;
+        }
+
+        .chat-message.sent .message-bubble {
+            background: #86C389;
+            color: white;
+        }
+
+        /* Profile Page Styles */
+        .profile-header-section {
+            background: #B8E0D2;
+            padding: 50px 20px 20px;
+        }
+
+        .profile-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-info-box {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .profile-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+
+        .profile-bio {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .profile-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .profile-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            background: #B8E0D2;
+            color: #1f2937;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .profile-btn:hover {
+            background: #A0D4C0;
+        }
+
+        .tree-container {
+            background: #FEF9E7;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .tree-svg {
+            width: 280px;
+            height: 380px;
+        }
+
+        .leaf {
+            transition: none;
+        }
+
+        .leaf:hover {
+            transform: none;
+        }
+
+        .leaf-text {
+            font-size: 11px;
+            font-weight: 600;
+            fill: #1f2937;
+            pointer-events: none;
+        }
+
+        .points-badge {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #6B4423;
+            position: absolute;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 20px;
+            background: #B8E0D2;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .bottom-nav.home-nav {
+            background: #54c4e6;
+        }
+
+        .bottom-nav.chat-nav {
+            background: #2c2c2c;
+            padding: 10px 15px;
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .nav-icon:hover, .nav-icon.active {
+            opacity: 1;
+        }
+
+        /* Chat Input */
+        .chat-input-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            color: #c4cad4;
+            font-size: 14px;
+        }
+
+        .input-icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+            cursor: pointer;
+        }
+        .streak-display {
+            margin-top: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #ffffff;
+            background: #54c4e6;
+            padding: 6px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            border: 2px solid #B8E0D2;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="notch"></div>
+        <div class="screen">
+            <!-- Homepage -->
+            <div class="page active" id="home">
+                <div class="header">
+                    <div class="user-info">
+                        <div class="avatar">👤</div>
+                        <div class="username-info">
+                            <span class="name">Name</span>
+                            <span class="username">@user123</span>
+                        </div>
+                    </div>
+                    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <div class="content">
+                    <div class="qotd-banner">
+                        <div class="qotd-label">💧 QOTD:</div>
+                        <div class="qotd-text">Pineapple on pizza?</div>
+                    </div>
+
+                    <div class="section-title">🌟 Recommended For You</div>
+                    <div class="profile-grid">
+                        <div class="profile-card" onclick="showPage('profile')">
+                            <div class="avatar">👨‍💼</div>
+                            <div class="name">Alex Chen</div>
+                            <div class="details">Commerce · Year 2</div>
+                            <div class="streak-badge">💧 5 day streak</div>
+                        </div>
+                        <div class="profile-card">
+                            <div class="avatar">👩‍🔬</div>
+                            <div class="name">Sarah Kim</div>
+                            <div class="details">Science · Year 3</div>
+                            <div class="streak-badge">💧 12 day streak</div>
+                        </div>
+                        <div class="profile-card">
+                            <div class="avatar">👨‍💻</div>
+                            <div class="name">Mike Johnson</div>
+                            <div class="details">Engineering · Year 4</div>
+                            <div class="streak-badge">💧 3 day streak</div>
+                        </div>
+                        <div class="profile-card">
+                            <div class="avatar">👩‍🎨</div>
+                            <div class="name">Emma Lee</div>
+                            <div class="details">Arts · Year 2</div>
+                            <div class="streak-badge">💧 8 day streak</div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">💬 Active Conversations</div>
+                    <div class="profile-grid">
+                        <div class="profile-card" onclick="showPage('chat')">
+                            <div class="avatar">👨‍💼</div>
+                            <div class="name">Jordan Lee</div>
+                            <div class="details">Last message: 2h ago</div>
+                        </div>
+                        <div class="profile-card">
+                            <div class="avatar">👩‍💼</div>
+                            <div class="name">Taylor Wong</div>
+                            <div class="details">Last message: 1d ago</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-nav home-nav">
+                    <svg class="nav-icon active" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+                    </svg>
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24" onclick="showPage('chat')">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path>
+                    </svg>
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24" onclick="showPage('profile')">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Chat Page -->
+            <div class="page" id="chat">
+                <div class="header">
+                    <div class="user-info">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24" onclick="showPage('home')" style="cursor:pointer">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
+                        </svg>
+                        <div class="avatar">👤</div>
+                        <div class="username-info">
+                            <span class="name">Name</span>
+                            <span class="username">@user123</span>
+                        </div>
+                    </div>
+                    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <div class="content chat-content">
+                    <div class="qotd-banner">
+                        <div class="qotd-label">💧 QOTD:</div>
+                        <div class="qotd-text">Pineapple on pizza?</div>
+                    </div>
+                    
+                    <div class="chat-message received">
+                        <div class="avatar">👨‍💼</div>
+                        <div class="message-bubble">Hey! How's your day going?</div>
+                    </div>
+                    
+                    <div class="chat-message sent">
+                        <div class="message-bubble">Pretty good! Just finished my COMM 196 class. How about you?</div>
+                        <div class="avatar">👤</div>
+                    </div>
+                    
+                    <div class="chat-message received">
+                        <div class="avatar">👨‍💼</div>
+                        <div class="message-bubble">Nice! I'm working on a group project. Want to grab coffee later?</div>
+                    </div>
+                    
+                    <div class="chat-message sent">
+                        <div class="message-bubble">Sounds great! 3pm at Blue Chip?</div>
+                        <div class="avatar">👤</div>
+                    </div>
+                </div>
+                <div class="bottom-nav chat-nav">
+                    <div class="chat-input-container">
+                        <svg class="input-icon" fill="#FFD700" viewBox="0 0 24 24">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"></path>
+                        </svg>
+                        <input type="text" class="chat-input" placeholder="Enter a message">
+                        <svg class="input-icon" fill="#FFD700" viewBox="0 0 24 24">
+                            <path d="M9 11.75c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zm6 0c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21.71.33 1.47.33 2.26 0 4.41-3.59 8-8 8z"></path>
+                        </svg>
+                        <svg class="input-icon" fill="#FFD700" viewBox="0 0 24 24">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"></path>
+                        </svg>
+                        <svg class="input-icon" fill="#FFD700" viewBox="0 0 24 24">
+                            <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-2.06 11L15 15.28 12.06 17l.78-3.33-2.59-2.24 3.41-.29L15 8l1.34 3.14 3.41.29-2.59 2.24.78 3.33z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div class="page" id="profile">
+                <div class="profile-header-section">
+                    <div class="profile-top">
+                        <div class="user-info">
+                            <div class="avatar">👤</div>
+                            <div class="username-info">
+                                <span class="name">Name they/them</span>
+                                <span class="username">Bio: year, major, faculty</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-info-box">
+                        <div class="profile-buttons">
+                            <button class="profile-btn">edit profile</button>
+                            <button class="profile-btn">share profile</button>
+                            <button class="profile-btn">🌳</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="streak-display"> 💧 <span id="streakCount">0</span>-day streak </div>
+                <div class="content profile-content">
+                    <div class="tree-container">
+                    <img src="tree.svg" alt="Description of image" width="400" height="400">
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24" onclick="showPage('home')">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+                    </svg>
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24" onclick="showPage('chat')">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path>
+                    </svg>
+                    <svg class="nav-icon active" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
